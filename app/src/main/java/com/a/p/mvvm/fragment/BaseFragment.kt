@@ -24,12 +24,9 @@ open class BaseFragment : Fragment() {
     protected var loadingView: ViewGroup? = null
 
 
-    private var loadingType: Boolean = true //true为骨架屏，false为普通loading
-
+    private var loadingType: Boolean = true
 
     companion object {
-
-        const val SHIMMER_DURATION = 1800L
 
     }
 
