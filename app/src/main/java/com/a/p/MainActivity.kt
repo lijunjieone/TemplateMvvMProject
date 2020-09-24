@@ -3,6 +3,7 @@ package com.a.p
 import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
 import com.a.p.mvvm.fragment.MainFragment
+import com.a.p.mvvm.fragment.TabFragment
 
 class MainActivity : AppCompatActivity() {
 
@@ -11,7 +12,7 @@ class MainActivity : AppCompatActivity() {
         setContentView(R.layout.main_activity)
         if (savedInstanceState == null) {
             supportFragmentManager.beginTransaction()
-                .replace(R.id.container, MainFragment.newInstance())
+                .replace(R.id.container, TabFragment.newInstance())
                 .commitNow()
         }
     }
