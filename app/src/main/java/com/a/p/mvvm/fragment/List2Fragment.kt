@@ -10,27 +10,27 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
-import android.support.v4.app.Fragment
-import android.support.v4.app.FragmentManager
-import android.support.v4.app.FragmentPagerAdapter
-
 import com.a.p.R
-import com.a.p.databinding.FragmentTabBinding
-import com.a.p.mvvm.viewmodel.TabViewModel
+import com.a.p.databinding.FragmentList2Binding
+import com.a.p.mvvm.viewmodel.List2ViewModel
+import com.a.p.views.adapter.List2Adapter
+import android.os.Handler
+import android.support.v7.widget.SimpleItemAnimator
+import android.support.v4.app.Fragment
+
+import com.a.p.views.CommonMultiItem
 
 
-class TabFragment : BaseFragment() {
+class List2Fragment : BaseFragment() {
 
-    protected lateinit var binding: FragmentTabBinding
-    lateinit var viewModel: TabViewModel
-    private lateinit var adapter: TabAdapter
+    protected lateinit var binding: FragmentList2Binding
+    lateinit var viewModel: List2ViewModel
+    private lateinit var adapter: List2Adapter
     var id: Long = 0L
 
 
-    private val fragments = ArrayList<TabViewModel.DataModel>()
-
     override fun getContentId(): Int {
-        return R.layout.fragment_tab
+        return R.layout.fragment_list2
     }
 
 
@@ -57,55 +57,56 @@ class TabFragment : BaseFragment() {
 
 
     private fun initViewModel() {
-        viewModel = ViewModelProviders.of(this).get(TabViewModel::class.java)
+        viewModel = ViewModelProviders.of(this).get(List2ViewModel::class.java)
         //可以在这里完成外部数据跟viewmodel的通讯
         id = arguments?.getLong(PARAM_DEFAULT_ID) ?: 0L
         viewModel.id = id
-
     }
 
 
     private fun initObserver() {
+        viewModel.itemList.observe(this, Observer {
+            it?.let {
+                val items = it.map {
+                    CommonMultiItem<List2ViewModel.DataModel>(
+                        if (it.letter.startsWith("Item: 1")) CommonMultiItem.ITEM_HEADER else CommonMultiItem.ITEM_ONE,
+                        0,
+                        it
+                    )
+                }
+                adapter.replaceData(items)
+
+            }
+        })
     }
 
+    override fun setUserVisibleHint(isVisibleToUser: Boolean) {
+        super.setUserVisibleHint(isVisibleToUser)
+
+    }
 
     private fun initView() {
-        initFragments()
-        binding.viewPager.adapter = TabAdapter(childFragmentManager)
-        binding.viewPager.offscreenPageLimit = 3
-        binding.tabLayout.setViewPager(binding.viewPager)
-
+        adapter = List2Adapter(ArrayList<CommonMultiItem<List2ViewModel.DataModel>>())
+        binding.recyclerView.adapter = adapter
         binding.viewModel = viewModel
         binding.lifecycleOwner = this
+
+        //解决刷新闪烁问题
+        val animator = binding.recyclerView.itemAnimator as SimpleItemAnimator
+        animator.supportsChangeAnimations = false
+
+
     }
 
     private fun initData() {
-    }
-
-    private fun initFragments() {
-        fragments.add(TabViewModel.DataModel("TAB1", List2Fragment()))
-        fragments.add(TabViewModel.DataModel("TAB2", EmptyFragment()))
-        fragments.add(TabViewModel.DataModel("TAB3", EmptyFragment()))
-    }
-
-    inner class TabAdapter(fm: FragmentManager) : FragmentPagerAdapter(fm) {
-
-        override fun getItem(p0: Int): Fragment {
-            return fragments[p0].fragment
-        }
-
-        override fun getCount() = fragments.size
-
-        override fun getPageTitle(position: Int): CharSequence? {
-            return fragments[position].title
-        }
+        viewModel.loadData()
     }
 
 
     companion object {
         const val PARAM_DEFAULT_ID = "param_default_id"
 
-        fun newInstance(id: Long = 0L): Fragment = TabFragment().apply {
+        fun newInstance(id: Long = 0L): Fragment = List2Fragment().apply {
             //在这里完成Fragment和外部数据的通讯
             val args = Bundle()
             args.putLong(PARAM_DEFAULT_ID, id)
@@ -115,3 +116,4 @@ class TabFragment : BaseFragment() {
 
 
 }
+
